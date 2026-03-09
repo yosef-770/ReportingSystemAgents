@@ -9,7 +9,7 @@ export default function (message) {
     for (let i = 0; i < message.length; i++) {
         const coded_letra = message.charAt(i);
 
-        if (/[^a-zA-Z]/.test(message[i])) {
+        if (/[^a-zA-Z]/.test(message[i]) && message[i] !== " ") {
             decoded_string = decoded_string + message[i];
         }
         else if (message[i] === message[i].toUpperCase()) {
