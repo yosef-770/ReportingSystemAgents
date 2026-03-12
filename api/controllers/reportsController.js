@@ -86,3 +86,29 @@ export async function importCsv(req, res) {
     return res.status(err.status ?? 500).json({ error: err.message });
   }
 }
+
+export async function listReports(req, res) {
+  try {
+    const { agentCode, category, urgency } = req.query ?? {};
+    const filters = req.user.role === 'agent'
+      ? { userId: req.user.id, category, urgency }
+      : { agentCode, category, urgency };
+    const docs = await reportService.listReports(filters);
+    return res.status(200).json({ reports: docs.map(toReportResponse) });
+  } catch (err) {
+    const status = err.status ?? 500;
+    return res.status(status).json({ error: err.message });
+  }
+}
+
+export async function getReportById(req, res) {
+  const { id } = req.params;
+  const report = await reportService.getReportById(id);
+  if (!report) {
+    return res.status(404).json({ error: 'Report not found' });
+  }
+  if (req.user.role === 'agent' && report.userId.toString() !== req.user.id.toString()) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  return res.status(200).json({ report: toReportResponse(report) });
+}

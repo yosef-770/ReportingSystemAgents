@@ -26,6 +26,12 @@ export async function createUser({ agentCode, fullName, role, password }) {
   };
 }
 
+export async function getUserByAgentCode(agentCode) {
+  const user = await User.findOne({ agentCode }).select('_id').lean();
+  if (!user) return null;
+  return { id: user._id };
+}
+
 export async function listUsers() {
   const users = await User.find({}).lean();
   return users.map((user) => ({

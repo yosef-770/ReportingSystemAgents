@@ -1,5 +1,6 @@
 import path from 'path';
 import Report from '../models/Report.js';
+import * as userService from './userService.js';
 
 const CATEGORIES = ['intelligence', 'logistics', 'alert'];
 const URGENCIES = ['low', 'medium', 'high'];
@@ -43,4 +44,28 @@ export function validateCsvRows(rows) {
     if (!row.message || !String(row.message).trim()) return { ok: false, index: i };
   }
   return { ok: true };
+}
+
+export async function listReports(filters) {
+  const query = {};
+  if (filters.userId) {
+    query.userId = filters.userId;
+    if (filters.category && CATEGORIES.includes(filters.category)) query.category = filters.category;
+    if (filters.urgency && URGENCIES.includes(filters.urgency)) query.urgency = filters.urgency;
+  } else {
+    if (filters.agentCode) {
+      const user = await userService.getUserByAgentCode(filters.agentCode);
+      if (!user) return [];
+      query.userId = user.id;
+    }
+    if (filters.category && CATEGORIES.includes(filters.category)) query.category = filters.category;
+    if (filters.urgency && URGENCIES.includes(filters.urgency)) query.urgency = filters.urgency;
+  }
+  const docs = await Report.find(query).sort({ createdAt: -1 }).lean();
+  return docs;
+}
+
+export async function getReportById(id) {
+  const doc = await Report.findById(id).lean();
+  return doc;
 }

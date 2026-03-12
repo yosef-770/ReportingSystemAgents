@@ -6,6 +6,8 @@ const router = Router();
 
 router.use(authJwt, requireRole('admin', 'agent'));
 
+router.get('/', reportsController.listReports);
+router.get('/:id', reportsController.getReportById);
 router.post('/', reportsController.createReport);
 router.post('/csv', reportsController.importCsv);
 
